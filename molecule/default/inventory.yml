@@ -1,0 +1,9 @@
+---
+all:
+  hosts:
+    oraclelinux-8:
+      ansible_connection: docker
+    ubuntu-latest:
+      ansible_connection: docker
+  vars:
+    ansible_user: root

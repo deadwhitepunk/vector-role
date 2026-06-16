@@ -1,0 +1,52 @@
+---
+- name: Verify Vector role deployment
+  hosts: all
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Check if Vector binary exists
+      ansible.builtin.stat:
+        path: /usr/bin/vector
+      register: vector_binary
+
+    - name: Assert Vector binary exists
+      ansible.builtin.assert:
+        that:
+          - vector_binary.stat.exists
+          - vector_binary.stat.executable
+        fail_msg: "Vector binary does not exist or is not executable"
+        success_msg: "Vector binary exists and is executable"
+
+    - name: Check Vector service status
+      ansible.builtin.systemd:
+        name: vector
+      register: vector_service_status
+      ignore_errors: true
+
+    - name: Assert Vector service is running
+      ansible.builtin.assert:
+        that:
+          - vector_service_status.status.ActiveState == "active"
+          - vector_service_status.status.SubState == "running"
+        fail_msg: |
+          Vector service is not running properly!
+          State: {{ vector_service_status.status.ActiveState | default('unknown') }}
+          SubState: {{ vector_service_status.status.SubState | default('unknown') }}
+        success_msg: "Vector service is running (ActiveState: active, SubState: running)"
+
+    - name: Check Vector config
+      ansible.builtin.command: vector validate /etc/vector/vector.yaml
+      register: vector_configure_status
+      ignore_errors: true
+
+    - name: Assert Vector config
+      ansible.builtin.assert:
+        that:
+          - vector_configure_status.rc == 0
+        fail_msg: |
+          Some problems with configuration!
+          {{ vector_configure_status.stdout }}
+        success_msg: |
+          Everything with OK with config, check it out:
+          {{ vector_configure_status.stdout }}

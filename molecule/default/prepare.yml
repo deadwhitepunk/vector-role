@@ -1,0 +1,25 @@
+- name: Prepare - install Python
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Check if apt package manager exists
+      ansible.builtin.raw: command -v apt-get
+      register: apt_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install Python and sudo on Ubuntu/Debian
+      ansible.builtin.raw: apt-get update && apt-get install -y sudo python3 python3-apt
+      when: apt_check.rc == 0
+      changed_when: false
+
+    - name: Check if dnf exists
+      ansible.builtin.raw: command -v dnf
+      register: dnf_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install Python on oraclelinux:8
+      ansible.builtin.raw: dnf install -y sudo python39
+      when: dnf_check.rc == 0
+      changed_when: false
