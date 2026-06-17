@@ -1,0 +1,10 @@
+---
+all:
+  hosts:
+    oraclelinux-8:
+      ansible_connection: podman
+    ubuntu-22.04:
+      ansible_connection: podman
+  vars:
+    ansible_user: root
+    ansible_python_interpreter: /usr/bin/python3

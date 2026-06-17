@@ -1,0 +1,53 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: podman
+
+platforms:
+  - name: oraclelinux-8
+    image: robertdebock/oraclelinux:latest
+    command: /usr/sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+
+  - name: ubuntu-22.04
+    image: geerlingguy/docker-ubuntu2204-ansible
+    command: /sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_REMOTE_TMP: /tmp/.ansible/tmp
+    ANSIBLE_LOCAL_TMP: /tmp/.ansible/tmp
+    ANSIBLE_PIPELINING: "True"
+    ANSIBLE_FORCE_COLOR: "True"
+  inventory:
+    group_vars:
+      all:
+        ansible_user: root
+        ansible_connection: podman
+        ansible_python_interpreter: /usr/bin/python3
+  config_options:
+    defaults:
+      interpreter_python: /usr/bin/python3
+      host_key_checking: false
+      timeout: 60
+
+verifier:
+  name: ansible
+
+scenario:
+  name: podman
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - destroy

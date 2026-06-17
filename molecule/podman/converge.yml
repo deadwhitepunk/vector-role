@@ -1,0 +1,10 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Include vector role
+      ansible.builtin.include_role:
+        name: ./vector-role
+        apply:
+          become: true

@@ -1,0 +1,55 @@
+---
+- name: Prepare - install Python and dependencies
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Update apt cache (Ubuntu)
+      raw: apt-get update
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install Python on Ubuntu
+      raw: apt-get install -y python3 python3-apt python3-minimal python3-venv python3-dev
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install Python on Oracle Linux with microdnf
+      raw: microdnf install -y python3 python3-devel python3-setuptools
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install Python on Oracle Linux with dnf (fallback)
+      raw: dnf install -y python3 python3-devel python3-setuptools
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install pip on Ubuntu
+      raw: apt-get install -y python3-pip
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install pip on Oracle Linux
+      raw: dnf install -y python3-pip
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install required Python packages
+      raw: pip3 install setuptools six
+      changed_when: false
+      ignore_errors: true
+
+    - name: Create python symlink
+      raw: ln -sf /usr/bin/python3 /usr/bin/python
+      changed_when: false
+      ignore_errors: true
+
+    - name: Verify Python installation
+      raw: python3 --version
+      register: python_version
+      changed_when: false
+      ignore_errors: true
+
+    - name: Display Python version
+      debug:
+        msg: "Python version: {{ python_version.stdout }}"
+      when: python_version.stdout is defined
